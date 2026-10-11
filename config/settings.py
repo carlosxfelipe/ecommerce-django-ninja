@@ -10,8 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from datetime import timedelta
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,16 +25,24 @@ import sys
 sys.path.insert(0, str(BASE_DIR / "apps"))
 
 
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / ".env")
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-on7p#frm$=0kp^=^b&&i-67+i33q0_0qyxff0-@@j7kj#(mu&="
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-on7p#frm$=0kp^=^b&&i-67+i33q0_0qyxff0-@@j7kj#(mu&=",
+)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True").lower() in ("true", "1", "t", "yes")
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get("ALLOWED_HOSTS", "*").split(",")
+    if host.strip()
+]
 
 
 # Application definition
@@ -40,6 +51,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "ninja_extra",
     "ninja_jwt",
+    "ninja_jwt.token_blacklist",
     "core",
     "accounts",
     "django.contrib.admin",
@@ -142,11 +154,18 @@ MAILERS = {
     },
 }
 
-# CORS Configuration (Development)
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS Configuration
+CORS_ALLOW_ALL_ORIGINS = os.environ.get("CORS_ALLOW_ALL_ORIGINS", "True").lower() in (
+    "true",
+    "1",
+    "t",
+    "yes",
+)
 
 # JWT Configuration (django-ninja-jwt)
 NINJA_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }

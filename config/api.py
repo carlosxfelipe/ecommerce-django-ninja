@@ -1,6 +1,20 @@
-from ninja_extra import NinjaExtraAPI
-from ninja_jwt.controller import NinjaJWTDefaultController
+from ninja_extra import ControllerBase, NinjaExtraAPI, api_controller
+from ninja_extra.permissions import AllowAny
+from ninja_jwt.controller import (
+    NinjaJWTDefaultController,
+    TokenBlackListController,
+)
 from scalar_ninja import ScalarConfig, ScalarViewer
+
+
+@api_controller("/token", permissions=[AllowAny], tags=["Token"], auth=None)
+class NinjaJWTExtendedController(
+    NinjaJWTDefaultController, TokenBlackListController, ControllerBase
+):
+    """Endpoints completos de JWT: pair, refresh, verify e blacklist (logout)."""
+
+    auto_import = False
+
 
 api = NinjaExtraAPI(
     title="Ninja API",
@@ -9,8 +23,8 @@ api = NinjaExtraAPI(
     docs=ScalarViewer(ScalarConfig(layout="classic")),
 )
 
-# JWT endpoints: /api/token/pair, /api/token/refresh, /api/token/verify
-api.register_controllers(NinjaJWTDefaultController)
+# JWT endpoints: /api/token/pair, /api/token/refresh, /api/token/verify, /api/token/blacklist
+api.register_controllers(NinjaJWTExtendedController)
 
 
 @api.get("/health", tags=["System"])

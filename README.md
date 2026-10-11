@@ -32,10 +32,12 @@ cd ecommerce-django-ninja
 uv sync
 ```
 
-### 3. Configurar variáveis de ambiente (opcional/recomendado)
+### 3. Configurar variáveis de ambiente (.env)
+
+Gera automaticamente o `.env` com uma `SECRET_KEY` segura a partir do template:
 
 ```bash
-cp .env.example .env
+uv run python setup_env.py
 ```
 
 ### 4. Executar as migrações do banco de dados
@@ -56,16 +58,17 @@ O servidor estará disponível em: `http://localhost:8000/` (ou `http://127.0.0.
 
 ## 🌐 Endpoints Disponíveis
 
-| Recurso                  | URL                                                                        | Descrição                                                |
-| ------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------- |
-| 📖 **API Docs (Scalar)** | [http://localhost:8000/api/docs](http://localhost:8000/api/docs)           | Documentação interativa da API com layout Scalar Classic |
-| 🩺 **Health Check**      | [http://localhost:8000/api/health](http://localhost:8000/api/health)       | Verificação de status e saúde da API                     |
-| 🏓 **Core Ping**         | [http://localhost:8000/api/core/ping](http://localhost:8000/api/core/ping) | Endpoint de teste da rota modular `core`                 |
-| 🛠️ **Django Admin**      | [http://localhost:8000/admin/](http://localhost:8000/admin/)               | Painel administrativo do Django                          |
-| 👤 **Registro**          | `POST /api/accounts/register`                                              | Cria uma conta com e-mail e senha                        |
-| 🔑 **Login (JWT)**       | `POST /api/token/pair`                                                     | Retorna `access` e `refresh` tokens                      |
-| ♻️ **Refresh**           | `POST /api/token/refresh`                                                  | Renova o `access` token                                  |
-| 🙋 **Perfil**            | `GET /api/accounts/me`                                                     | Dados do usuário autenticado (requer Bearer token)       |
+| Recurso                   | URL                                                                        | Descrição                                                |
+| ------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------- |
+| 📖 **API Docs (Scalar)**  | [http://localhost:8000/api/docs](http://localhost:8000/api/docs)           | Documentação interativa da API com layout Scalar Classic |
+| 🩺 **Health Check**       | [http://localhost:8000/api/health](http://localhost:8000/api/health)       | Verificação de status e saúde da API                     |
+| 🏓 **Core Ping**          | [http://localhost:8000/api/core/ping](http://localhost:8000/api/core/ping) | Endpoint de teste da rota modular `core`                 |
+| 🛠️ **Django Admin**       | [http://localhost:8000/admin/](http://localhost:8000/admin/)               | Painel administrativo do Django                          |
+| 👤 **Registro**           | `POST /api/accounts/register`                                              | Cria uma conta com e-mail e senha                        |
+| 🔑 **Login (JWT)**        | `POST /api/token/pair`                                                     | Retorna `access` e `refresh` tokens                      |
+| ♻️ **Refresh**            | `POST /api/token/refresh`                                                  | Renova o `access` token (com rotação automática)         |
+| 🚪 **Logout / Blacklist** | `POST /api/token/blacklist`                                                | Invalida o `refresh` token (logout seguro)               |
+| 🙋 **Perfil**             | `GET /api/accounts/me`                                                     | Dados do usuário autenticado (requer Bearer token)       |
 
 ---
 
