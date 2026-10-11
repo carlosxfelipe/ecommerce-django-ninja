@@ -62,12 +62,57 @@ O servidor estará disponível em: `http://localhost:8000/` (ou `http://127.0.0.
 | 🩺 **Health Check**      | [http://localhost:8000/api/health](http://localhost:8000/api/health)       | Verificação de status e saúde da API                     |
 | 🏓 **Core Ping**         | [http://localhost:8000/api/core/ping](http://localhost:8000/api/core/ping) | Endpoint de teste da rota modular `core`                 |
 | 🛠️ **Django Admin**      | [http://localhost:8000/admin/](http://localhost:8000/admin/)               | Painel administrativo do Django                          |
+| 👤 **Registro**          | `POST /api/accounts/register`                                              | Cria uma conta com e-mail e senha                        |
+| 🔑 **Login (JWT)**       | `POST /api/token/pair`                                                     | Retorna `access` e `refresh` tokens                      |
+| ♻️ **Refresh**           | `POST /api/token/refresh`                                                  | Renova o `access` token                                  |
+| 🙋 **Perfil**            | `GET /api/accounts/me`                                                     | Dados do usuário autenticado (requer Bearer token)       |
 
-> **Dica**: Para acessar o Django Admin, crie um superusuário:
->
-> ```bash
-> uv run python manage.py createsuperuser
-> ```
+---
+
+## 🔐 Autenticação (JWT via e-mail)
+
+O app `accounts` define um usuário customizado em que o **e-mail é o identificador único** (não existe `username`). A autenticação usa [`django-ninja-jwt`](https://github.com/eadwinCode/django-ninja-jwt).
+
+```bash
+# 1. Registrar
+curl -X POST http://localhost:8000/api/accounts/register \
+  -H "Content-Type: application/json" \
+  -d '{"email": "voce@exemplo.com", "password": "S3nh@Forte!2026"}'
+
+# 2. Login (retorna access e refresh)
+curl -X POST http://localhost:8000/api/token/pair \
+  -H "Content-Type: application/json" \
+  -d '{"email": "voce@exemplo.com", "password": "S3nh@Forte!2026"}'
+
+# 3. Acessar rota protegida
+curl http://localhost:8000/api/accounts/me \
+  -H "Authorization: Bearer <access_token>"
+```
+
+Para proteger qualquer rota, use `auth=JWTAuth()`:
+
+```python
+from ninja_jwt.authentication import JWTAuth
+
+
+@router.get("/protegida", auth=JWTAuth())
+def protegida(request):
+    return {"email": request.auth.email}
+```
+
+> **Importante:** `AUTH_USER_MODEL = "accounts.User"` deve ser definido **antes da primeira migração**. Se você já tinha um `db.sqlite3` criado com o usuário padrão do Django, apague-o e rode `uv run python manage.py migrate` novamente.
+
+Para criar um superusuário (o login no Admin também é por e-mail):
+
+```bash
+uv run python manage.py createsuperuser
+```
+
+Para rodar os testes:
+
+```bash
+uv run python manage.py test
+```
 
 ---
 
@@ -145,6 +190,10 @@ O novo endpoint estará imediatamente acessível em `http://localhost:8000/api/m
 ecommerce-django-ninja/
 ├── apps/               # Aplicações Django modulares
 │   ├── __init__.py
+│   ├── accounts/       # Usuário customizado (login por e-mail) e rotas de conta
+│   │   ├── api.py
+│   │   ├── models.py
+│   │   └── admin.py
 │   └── core/           # App principal modular
 │       └── api.py
 ├── config/             # Configurações centrais do Django

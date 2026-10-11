@@ -1,12 +1,16 @@
-from ninja import NinjaAPI
+from ninja_extra import NinjaExtraAPI
+from ninja_jwt.controller import NinjaJWTDefaultController
 from scalar_ninja import ScalarConfig, ScalarViewer
 
-api = NinjaAPI(
+api = NinjaExtraAPI(
     title="Ninja API",
     version="1.0.0",
     description="API documentation powered by Scalar and Django Ninja",
     docs=ScalarViewer(ScalarConfig(layout="classic")),
 )
+
+# JWT endpoints: /api/token/pair, /api/token/refresh, /api/token/verify
+api.register_controllers(NinjaJWTDefaultController)
 
 
 @api.get("/health", tags=["System"])
@@ -19,6 +23,8 @@ def health_check(request):
 
 
 # Register modular routers
+from accounts.api import router as accounts_router
 from core.api import router as core_router
 
 api.add_router("/core", core_router)
+api.add_router("/accounts", accounts_router)
